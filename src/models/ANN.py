@@ -15,27 +15,3 @@ class ANN(nn.Module):
         x = self.relu(x)
         x = self.layer_2(x)
         return x
-    
-    def train(self, input_data, target_data, num_epochs=1000, learning_rate=0.01, model_save_path=None):
-        criterion = nn.MSELoss()
-        optimizer = optim.SGD(self.parameters(), lr=learning_rate)
-        
-        for epoch in range(num_epochs):
-            outputs = self(input_data)
-            loss = criterion(outputs, target_data)
-            
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            
-            if (epoch + 1) % 100 == 0:
-                print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
-
-                # save model if specified
-                if model_save_path:
-                    torch.save(self.state_dict(), model_save_path)
-
-    
-    def predict(self, input_data):
-        with torch.no_grad():
-            return self(input_data)

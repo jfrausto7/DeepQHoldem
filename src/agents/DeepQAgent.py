@@ -2,24 +2,38 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import random
+import numpy as np
 
 from models.ANN import ANN
 
 '''Simplified implementation of agent described in "Human-level control through deep reinforcement
  learning" by Mnih et al. (https://www.nature.com/articles/nature14236)
 '''
-class DeepQAgent:
+class DeepQAgent(object):
     def __init__(self, input_size, hidden_size, output_size, learning_rate=0.01, gamma=0.99):
+        self.use_raw = False
         self.q_network = ANN(input_size, hidden_size, output_size)
         self.target_network = ANN(input_size, hidden_size, output_size)
         self.target_network.load_state_dict(self.q_network.state_dict())
         self.optimizer = optim.SGD(self.q_network.parameters(), lr=learning_rate)
         self.criterion = nn.MSELoss()
         self.gamma = gamma
+    
+    def step(self, state):
+        legal_actions = list(state['legal_actions'].keys())
+        actions = np.zeros(list(self.q_network.modules())[-1].out_features)
+        actions[legal_actions] = 1
+        s = torch.from_numpy(np.concatenate((state['obs'], actions)).astype(np.float32))
+
+        action = self.select_action(s, 0.1).item()
+        while action not in legal_actions:
+            action = self.select_action(s, 0.1).item()
+
+        return action
 
     def select_action(self, state, epsilon):
         if random.random() < epsilon:
-            return torch.tensor([random.randrange(self.q_network.out_features)], dtype=torch.long)
+            return torch.tensor([random.randrange(list(self.q_network.modules())[-1].out_features)], dtype=torch.long)
         else:
             with torch.no_grad():
                 q_values = self.q_network(state)

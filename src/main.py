@@ -54,14 +54,14 @@ def main(args: argparse.Namespace) -> None:
         data = generateData()
 
     # instantiate agent & envioronment
-    agent = DeepQAgent()
-    env = setupEnvironment()
+    agent = DeepQAgent(60, 60, 6) # TODO decide on middle value (first and last value should be defined by the state size and action space size respectively)
+    env = setupEnvironment(custom_agent=agent)
 
     # training loop
-    train(agent, env, args.episodes, args.freq)
+    # train(agent, env, args.episodes, args.freq)
 
     # start game
-    # playGame()
+    playGame(env, is_training=True)
 
     return None # TODO figure out what to return if anything
 

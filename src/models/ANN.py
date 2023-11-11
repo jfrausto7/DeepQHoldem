@@ -5,7 +5,7 @@ import torch.optim as optim
 # ANN architecture (loosely inspired by: https://www.datacamp.com/tutorial/pytorch-tutorial-building-a-simple-neural-network-from-scratch)
 class ANN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
-        super(ANN, self).__init()
+        super(ANN, self).__init__()
         self.layer_1 = nn.Linear(input_size, hidden_size)
         self.relu = nn.ReLU()
         self.layer_2 = nn.Linear(hidden_size, output_size)

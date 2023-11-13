@@ -33,14 +33,6 @@ def parse_args() -> argparse.Namespace:
         dest="episodes",
     )
 
-    parser.add_argument(
-        "--freq",
-        default=config["freq"],
-        type=int,
-        help="Number of episodes to update network with.",
-        dest="freq",
-    )
-
     # TODO: add any needed args for parsing
 
     return parser.parse_args()

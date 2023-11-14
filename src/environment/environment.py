@@ -4,16 +4,15 @@ from rlcard.utils import print_card, reorganize
 import numpy as np
 import os
 
-def setupEnvironment(custom_agent=None):
+def setupEnvironment(num_chips, custom_agent=None):
     # make environment
     global_seed = 0
-    env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': 1000})
-    eval_env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': 1000})
+    env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
+    eval_env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
 
     # set iteration numbers and how frequently we evaluate the performance
     evaluate_every = 100
     evaluate_num = 1000
-    episode_num = 100000
 
     # set intial memory size
     memory_init_size = 1000
@@ -32,7 +31,7 @@ def setupEnvironment(custom_agent=None):
     
     return env
 
-def playGame(env, is_training=True):
+def playGame(env, num_episodes, is_training=True):
     try:
         if is_training:
             filename = '{}/../training_data/data_samples.csv'.format(os.path.dirname(__file__))
@@ -40,7 +39,8 @@ def playGame(env, is_training=True):
             f = open(filename, 'w')
             f.write('s,a,r,s_prime\n')
         
-        while (True):
+        for i in range(num_episodes):
+            print("Game number " + str(i))
             print(">> Start a new game")
 
             trajectories, payoffs = env.run(is_training=True)

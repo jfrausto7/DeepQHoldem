@@ -9,7 +9,8 @@ from utils.training_loop import train
 
 
 config = {
-    "episodes": 500,
+    "episodes": 100000,
+    "chips": 1000
 
 }
 
@@ -33,6 +34,14 @@ def parse_args() -> argparse.Namespace:
         dest="episodes",
     )
 
+    parser.add_argument(
+        "--chips",
+        default=config["episodes"],
+        type=int,
+        help="Number of starting chips for each agent/player.",
+        dest="chips",
+    )
+
     # TODO: add any needed args for parsing
 
     return parser.parse_args()
@@ -46,14 +55,14 @@ def main(args: argparse.Namespace) -> None:
         data = generateData()
 
     # instantiate agent & envioronment
-    agent = DeepQAgent(60, 60, 6) # TODO decide on middle value (first and last value should be defined by the state size and action space size respectively)
-    env = setupEnvironment(custom_agent=agent)
+    agent = DeepQAgent(60, 26, 6) # (1/3) of state space + action space
+    env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
 
     # training loop
     # train(agent, env, args.episodes, args.freq)
 
     # start game
-    playGame(env, is_training=True)
+    playGame(env, num_episodes=args.episodes, is_training=True)
 
     return None # TODO figure out what to return if anything
 

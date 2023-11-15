@@ -10,8 +10,9 @@ from utils.training_loop import train
 
 config = {
     "episodes": 100000,
-    "chips": 1000
-
+    "chips": 1000,
+    "state_size": 77,
+    "num_actions": 23,
 }
 
 def parse_args() -> argparse.Namespace:
@@ -55,7 +56,7 @@ def main(args: argparse.Namespace) -> None:
         data = generateData()
 
     # instantiate agent & envioronment
-    agent = DeepQAgent(60, 26, 6) # (1/3) of state space + action space
+    agent = DeepQAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
     env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
 
     # training loop

@@ -31,12 +31,11 @@ def setupEnvironment(num_chips, custom_agent=None):
     
     return env
 
-def playGame(env, num_episodes, is_training=True):
+def playGame(env, num_episodes, is_training=True, training_data_filename='{}/../training_data/data_samples.csv'.format(os.path.dirname(__file__))):
     try:
         if is_training:
-            filename = '{}/../training_data/data_samples.csv'.format(os.path.dirname(__file__))
-            os.makedirs(os.path.dirname(filename), exist_ok=True)
-            f = open(filename, 'w')
+            os.makedirs(os.path.dirname(training_data_filename), exist_ok=True)
+            f = open(training_data_filename, 'w')
             f.write('s,a,r,s_prime\n')
         
         for i in range(num_episodes):

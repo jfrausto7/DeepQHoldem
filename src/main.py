@@ -13,6 +13,7 @@ config = {
     "chips": 1000,
     "state_size": 77,
     "num_actions": 23,
+    "training_data_filename": '{}/training_data/data_samples.csv'.format(os.path.dirname(__file__))
 }
 
 def parse_args() -> argparse.Namespace:
@@ -52,18 +53,19 @@ def parse_args() -> argparse.Namespace:
 def main(args: argparse.Namespace) -> None:
     # TODO: fill in main function
 
-    if args.generate:
-        data = generateData()
-
     # instantiate agent & envioronment
     agent = DeepQAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
     env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
+
+    # populate training_data_file with data from playing against an automated agent
+    if args.generate:
+        generateData(env, args.episodes, config["training_data_filename"])
 
     # training loop
     # train(agent, env, args.episodes, args.freq)
 
     # start game
-    playGame(env, num_episodes=args.episodes, is_training=True)
+    # playGame(env, num_episodes=args.episodes, is_training=False)
 
     return None # TODO figure out what to return if anything
 

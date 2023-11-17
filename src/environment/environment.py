@@ -1,5 +1,6 @@
 import rlcard
-from rlcard.agents import RandomAgent, NolimitholdemHumanAgent as HumanAgent
+from rlcard.agents import RandomAgent, CFRAgent
+from rlcard.models.pretrained_models import ROOT_PATH
 from rlcard.utils import print_card, reorganize
 import numpy as np
 import os
@@ -24,10 +25,16 @@ def setupEnvironment(num_chips, custom_agent=None):
     # directory for logs
     log_dir = f'./experiments/logs/{evaluate_every}/'
 
+    opponent_agent = CFRAgent(env, model_path=os.path.join(ROOT_PATH, 'leduc_holdem_cfr'))
+    def step(state):
+        action, _ = opponent_agent.eval_step(state)
+        return action
+    opponent_agent.step = step
+
     if custom_agent is not None:
-        env.set_agents([custom_agent, RandomAgent(env.num_actions)])
+        env.set_agents([custom_agent, opponent_agent])
     else:
-        env.set_agents([RandomAgent(env.num_actions), RandomAgent(env.num_actions)])
+        env.set_agents([RandomAgent(env.num_actions), opponent_agent])
     
     return env
 

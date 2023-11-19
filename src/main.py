@@ -5,6 +5,7 @@ from agents.DeepQAgent import DeepQAgent
 from environment.environment import playGame, setupEnvironment
 
 from utils.data_utils import generateData
+from utils.evaluation import calculate_win_rate
 from utils.training_loop import train
 
 
@@ -66,6 +67,10 @@ def main(args: argparse.Namespace) -> None:
 
     # start game
     # playGame(env, num_episodes=args.episodes, is_training=False)
+
+    # calculate win rate after training or data generation
+    win_rate = calculate_win_rate(env, args.episodes)
+    print(f"Win Rate: {win_rate * 100:.2f}%")
 
     return None # TODO figure out what to return if anything
 

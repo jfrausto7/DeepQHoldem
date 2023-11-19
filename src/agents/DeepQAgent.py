@@ -30,6 +30,9 @@ class DeepQAgent(object):
             action = self.select_action(s, 0.1).item()
 
         return action
+    
+    def eval_step(self, state):
+        return self.step(state), {}
 
     def select_action(self, state, epsilon):
         if random.random() < epsilon:

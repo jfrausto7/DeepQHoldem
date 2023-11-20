@@ -12,6 +12,7 @@ config = {
     "chips": 1000,
     "state_size": 77,
     "num_actions": 23,
+    "convergence_interval": 1000,
     "training_data_filename": '{}/training_data/data_samples.csv'.format(os.path.dirname(__file__))
 }
 
@@ -43,6 +44,14 @@ def parse_args() -> argparse.Namespace:
         dest="chips",
     )
 
+    parser.add_argument(
+        "--convergence_interval",
+        default=config["convergence_interval"],
+        type=int,
+        help="Interval for calculating and printing the convergence rate during training.",
+        dest="convergence_interval",
+    )
+
     # TODO: add any needed args for parsing
 
     return parser.parse_args()
@@ -58,7 +67,7 @@ def main(args: argparse.Namespace) -> None:
 
     # populate training_data_file with data from playing against an automated agent
     if args.generate:
-        generateData(env, args.episodes, config["training_data_filename"])
+        generateData(env, args.episodes, args.convergence_interval, config["training_data_filename"])
 
     # training loop
     # train(agent, env, args.episodes, args.freq)
@@ -76,6 +85,9 @@ def main(args: argparse.Namespace) -> None:
     # calculate expected earnings
     avg_expected_earnings = evaluator.calculate_expected_earnings(args.episodes)
     print(f'Average Expected Earnings: {avg_expected_earnings}')
+
+    # TODO make sure converge rates work with online training; plot convergence rates
+    print(agent.convergence_rates)
 
     return None # TODO figure out what to return if anything
 

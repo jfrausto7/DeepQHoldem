@@ -38,7 +38,7 @@ def setupEnvironment(num_chips, custom_agent=None):
     
     return env
 
-def playGame(env, num_episodes, is_training=True, training_data_filename='{}/../training_data/data_samples.csv'.format(os.path.dirname(__file__))):
+def playGame(env, num_episodes, convergence_interval, is_training=True, training_data_filename='{}/../training_data/data_samples.csv'.format(os.path.dirname(__file__))):
     try:
         if is_training:
             os.makedirs(os.path.dirname(training_data_filename), exist_ok=True)
@@ -48,6 +48,8 @@ def playGame(env, num_episodes, is_training=True, training_data_filename='{}/../
         for i in range(num_episodes):
             print("Game number " + str(i))
             print(">> Start a new game")
+
+            env.agents[0].update_target_network()
 
             trajectories, payoffs = env.run(is_training=True)
 
@@ -70,10 +72,10 @@ def playGame(env, num_episodes, is_training=True, training_data_filename='{}/../
             action_record = final_state['action_record']
             state = final_state['raw_obs']
             _action_list = []
-            for i in range(1, len(action_record)+1):
-                if action_record[-i][0] == state['current_player']:
+            for j in range(1, len(action_record)+1):
+                if action_record[-j][0] == state['current_player']:
                     break
-                _action_list.insert(0, action_record[-i])
+                _action_list.insert(0, action_record[-j])
             for pair in _action_list:
                 print('>> Player', pair[0], 'chooses', pair[1])
 
@@ -90,6 +92,12 @@ def playGame(env, num_episodes, is_training=True, training_data_filename='{}/../
             else:
                 print('You lose {} chips!'.format(-payoffs[0]))
             print('')
+
+            # calculate convergence rate
+            if i % convergence_interval == 0:
+                convergence_rate = env.agents[0].calculate_convergence_rate()
+                # env.agents[0].update_target_network()
+                print(f'Convergence rate after {i} episodes: {convergence_rate}')
 
             if not is_training:
                 input("Press any key to continue...")

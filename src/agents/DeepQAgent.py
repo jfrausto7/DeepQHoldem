@@ -18,6 +18,7 @@ class DeepQAgent(object):
         self.optimizer = optim.SGD(self.q_network.parameters(), lr=learning_rate)
         self.criterion = nn.MSELoss()
         self.gamma = gamma
+        self.convergence_rates = []
     
     def step(self, state):
         legal_actions = list(state['legal_actions'].keys())
@@ -56,6 +57,22 @@ class DeepQAgent(object):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+    def calculate_convergence_rate(self):
+        q_network_params = list(self.q_network.parameters())
+        target_network_params = list(self.target_network.parameters())
+        current_convergence_rates = []
+
+        for q_param, target_param in zip(q_network_params, target_network_params):
+            q_param_data = q_param.data.numpy().flatten()
+            target_param_data = target_param.data.numpy().flatten()
+
+            convergence_rate = np.mean(np.abs(q_param_data - target_param_data))
+            current_convergence_rates.append(convergence_rate)
+
+        self.convergence_rates.append(current_convergence_rates)
+        return current_convergence_rates
+
 
     def update_target_network(self):
         self.target_network.load_state_dict(self.q_network.state_dict())

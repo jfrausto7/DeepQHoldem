@@ -38,7 +38,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--chips",
-        default=config["episodes"],
+        default=config["chips"],
         type=int,
         help="Number of starting chips for each agent/player.",
         dest="chips",

@@ -86,6 +86,10 @@ def main(args: argparse.Namespace) -> None:
     avg_expected_earnings = evaluator.calculate_expected_earnings(args.episodes)
     print(f'Average Expected Earnings: {avg_expected_earnings}')
 
+    # calculate action entropy
+    entropy = evaluator.calculate_action_entropy(args.episodes)
+    print(f'Action Entropy: {entropy}')
+
     # TODO make sure converge rates work with online training; plot convergence rates
     print(agent.convergence_rates)
 

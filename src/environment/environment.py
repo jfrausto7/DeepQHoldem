@@ -1,4 +1,5 @@
 from logging import Logger
+import torch
 import rlcard
 from rlcard.agents import RandomAgent, CFRAgent
 from rlcard.models.pretrained_models import ROOT_PATH
@@ -25,10 +26,9 @@ def setupEnvironment(num_chips, custom_agent=None):
     
     return env
 
-def playGame(env, num_episodes, convergence_interval, is_training=True, training_data_filename='{}/../training_data/data_samples.csv'.format(os.path.dirname(__file__))):
-    
-    # directory for logs
-    log_dir = f'./experiments/logs/{100}/'
+def playGame(env, num_episodes, convergence_interval, is_training=True, training_data_filename='{}/../training_data/data_samples.csv'):
+
+    log_dir = f'./experiments/logs/{num_episodes}/'
     try:
         if is_training:
             os.makedirs(os.path.dirname(training_data_filename), exist_ok=True)
@@ -57,8 +57,11 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                         s_prime = np.concatenate((next_state['obs'], next_legal_actions))
                         f.write('{},{},{},{}\n'.format(s, a, r, s_prime))
 
+                        # Train the agent online
+                        env.agents[0].train(torch.from_numpy(s).float(), a, torch.from_numpy(s_prime).float(), r, False)
+
                 # If the human does not take the final action, we need to
-                # print other players action
+                # print other players' actions
                 final_state = trajectories[0][-1]
                 action_record = final_state['action_record']
                 state = final_state['raw_obs']
@@ -87,24 +90,24 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                 # evaluate convergence rate & plot reward values
                 print("Evaluating...")
                 if i % convergence_interval == 0:
-                    print
                     logger.log_performance(
-                    i,
-                    tournament(
-                        env,
-                        convergence_interval,
-                    )[0]
-                )
+                        i,
+                        tournament(
+                            env,
+                            convergence_interval,
+                        )[0]
+                    )
                     convergence_rate = env.agents[0].calculate_convergence_rate()
-                    # env.agents[0].update_target_network()
                     print(f'Convergence rate after {i} episodes: {convergence_rate}')
 
                 if not is_training:
                     input("Press any key to continue...")
+
             # get paths
             csv_path, fig_path = logger.csv_path, logger.fig_path
         # plot the reward learning curve
         plot_curve(csv_path, fig_path, 'cfr')
+
     finally:
         if is_training:
             f.close()

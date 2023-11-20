@@ -46,12 +46,13 @@ class DeepQAgent(object):
     def train(self, state, action, next_state, reward, done):
         q_values = self.q_network(state)
         next_q_values = self.target_network(next_state)
+
         target_q_values = q_values.clone()
 
         if done:
-            target_q_values[0][action] = reward
+            target_q_values[action] = reward
         else:
-            target_q_values[0][action] = reward + self.gamma * torch.max(next_q_values)
+            target_q_values[action] = reward + self.gamma * torch.max(next_q_values)
 
         loss = self.criterion(q_values, target_q_values)
         self.optimizer.zero_grad()

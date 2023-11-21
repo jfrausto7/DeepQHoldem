@@ -15,7 +15,7 @@ class DeepQAgent(object):
         self.q_network = ANN(input_size, hidden_size, output_size)
         self.target_network = ANN(input_size, hidden_size, output_size)
         self.target_network.load_state_dict(self.q_network.state_dict())
-        self.optimizer = optim.SGD(self.q_network.parameters(), lr=learning_rate)
+        self.optimizer = optim.Adam(self.q_network.parameters(), lr=learning_rate)
         self.criterion = nn.MSELoss()
         self.gamma = gamma
         self.convergence_rates = []
@@ -65,10 +65,10 @@ class DeepQAgent(object):
         current_convergence_rates = []
 
         for q_param, target_param in zip(q_network_params, target_network_params):
-            q_param_data = q_param.data.numpy().flatten()
-            target_param_data = target_param.data.numpy().flatten()
+            q_param_data = q_param.data.flatten()
+            target_param_data = target_param.data.flatten()
 
-            convergence_rate = np.mean(np.abs(q_param_data - target_param_data))
+            convergence_rate = torch.mean(torch.abs(q_param_data - target_param_data)).item()
             current_convergence_rates.append(convergence_rate)
 
         self.convergence_rates.append(current_convergence_rates)

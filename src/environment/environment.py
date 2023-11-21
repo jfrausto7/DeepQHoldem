@@ -40,8 +40,6 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                 print("Game number " + str(i))
                 print(">> Start a new game")
 
-                env.agents[0].update_target_network()
-
                 trajectories, payoffs = env.run(is_training=True)
 
                 if is_training:
@@ -89,7 +87,7 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
 
                 # evaluate convergence rate & plot reward values
                 print("Evaluating...")
-                if i % convergence_interval == 0:
+                if i % convergence_interval == 0 and i != 0:
                     logger.log_performance(
                         i,
                         tournament(
@@ -98,6 +96,7 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                         )[0]
                     )
                     convergence_rate = env.agents[0].calculate_convergence_rate()
+                    env.agents[0].update_target_network()
                     print(f'Convergence rate after {i} episodes: {convergence_rate}')
 
                 if not is_training:

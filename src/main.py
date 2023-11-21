@@ -91,7 +91,7 @@ def main(args: argparse.Namespace) -> None:
     print(f'Action Entropy: {entropy}')
 
     # TODO make sure converge rates work with online training; plot convergence rates
-    print(agent.convergence_rates)
+    print(f'Convergence Rates: {agent.convergence_rates}')
 
     return None # TODO figure out what to return if anything
 

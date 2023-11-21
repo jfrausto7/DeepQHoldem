@@ -26,22 +26,25 @@ class DeepQAgent(object):
         actions[legal_actions] = 1
         s = torch.from_numpy(np.concatenate((state['obs'], actions)).astype(np.float32))
 
-        action = self.select_action(s, 0.1).item()
+        action = self.select_action(s, 0.1, legal_actions).item()
         while action not in legal_actions:
-            action = self.select_action(s, 0.1).item()
-
+            action = self.select_action(s, 0.1, legal_actions).item()
         return action
     
     def eval_step(self, state):
         return self.step(state), {}
 
-    def select_action(self, state, epsilon):
+    def select_action(self, state, epsilon, legal_actions):
         if random.random() < epsilon:
             return torch.tensor([random.randrange(list(self.q_network.modules())[-1].out_features)], dtype=torch.long)
         else:
             with torch.no_grad():
                 q_values = self.q_network(state)
-                return torch.argmax(q_values)
+
+                # filter Q-values for legal actions
+                legal_q_values = q_values[legal_actions]
+                max_index = legal_actions[torch.argmax(legal_q_values)]
+                return torch.tensor([max_index], dtype=torch.long)
 
     def train(self, state, action, next_state, reward):
         q_values = self.q_network(state)

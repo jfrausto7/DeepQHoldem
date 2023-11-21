@@ -72,9 +72,16 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                     print('>> Player', pair[0], 'chooses', pair[1])
 
                 # Let's take a look at what the agent card is
-                print('===============     Cards all Players 1   ===============')
-                for hands in env.get_perfect_information()['hand_cards']:
+                print('===============     Cards     ===============')
+                for n, hands in enumerate(env.get_perfect_information()['hand_cards']):
+                    print(f'Player {n+1}\'s Hand:')
                     print_card(hands)
+                
+                if env.get_perfect_information()['public_card']:
+                    print("Community Cards:")
+                    print_card(env.get_perfect_information()['public_card'])
+                    # for hands in env.get_perfect_information()['public_card']:
+                    #     print_card(hands)
 
                 print('===============     Result     ===============')
                 if payoffs[0] > 0:
@@ -86,8 +93,8 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                 print('')
 
                 # evaluate convergence rate & plot reward values
-                print("Evaluating...")
                 if i % convergence_interval == 0 and i != 0:
+                    print("Evaluating...")
                     logger.log_performance(
                         i,
                         tournament(

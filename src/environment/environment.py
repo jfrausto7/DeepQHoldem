@@ -2,22 +2,26 @@ from logging import Logger
 import torch
 import rlcard
 from rlcard.agents import RandomAgent, CFRAgent
+from rlcard.agents import NolimitholdemHumanAgent as HumanAgent
 from rlcard.models.pretrained_models import ROOT_PATH
 from rlcard.utils import print_card, reorganize, tournament, Logger, plot_curve
 import numpy as np
 import os
 
-def setupEnvironment(num_chips, custom_agent=None):
+def setupEnvironment(num_chips, custom_agent=None, is_human=False):
     # make environment
     global_seed = 0
     env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
     # eval_env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
-
-    opponent_agent = CFRAgent(env, model_path=os.path.join(ROOT_PATH, 'leduc_holdem_cfr'))
     def step(state):
         action, _ = opponent_agent.eval_step(state)
         return action
-    opponent_agent.step = step
+    
+    if not is_human:
+        opponent_agent = CFRAgent(env, model_path=os.path.join(ROOT_PATH, 'leduc_holdem_cfr'))
+        opponent_agent.step = step
+    else:
+        opponent_agent = HumanAgent(env.num_actions)
 
     if custom_agent is not None:
         env.set_agents([custom_agent, opponent_agent])

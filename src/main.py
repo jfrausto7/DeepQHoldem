@@ -13,6 +13,7 @@ config = {
     "state_size": 77,
     "num_actions": 23,
     "convergence_interval": 1000,
+    "human_episodes": 5,
     "training_data_filename": '{}/training_data/data_samples.csv'.format(os.path.dirname(__file__))
 }
 
@@ -52,6 +53,19 @@ def parse_args() -> argparse.Namespace:
         dest="convergence_interval",
     )
 
+    parser.add_argument(
+        "--human", help="Play against the agent! Be sure to include the '--generated' flag otherwise it won't be trained!",
+        action="store_true", dest="human"
+    )
+
+    parser.add_argument(
+        "--human_episodes",
+        default=config["human_episodes"],
+        type=int,
+        help="Number of rounds to play against agent when using '--human' flag.",
+        dest="human_episodes",
+    )
+
     # TODO: add any needed args for parsing
 
     return parser.parse_args()
@@ -76,6 +90,9 @@ def main(args: argparse.Namespace) -> None:
     # playGame(env, num_episodes=args.episodes, is_training=False)
 
     # evaluate
+    if args.human:
+        env = setupEnvironment(num_chips=args.chips, custom_agent=agent, is_human=True)
+        args.episodes = args.human_episodes
     evaluator = Evaluator(env)
 
     # calculate win rate after training or data generation
@@ -90,7 +107,7 @@ def main(args: argparse.Namespace) -> None:
     entropy = evaluator.calculate_action_entropy(args.episodes)
     print(f'Action Entropy: {entropy}')
 
-    # TODO make sure converge rates work with online training; plot convergence rates
+    # TODO plot convergence rates
     print(f'Convergence Rates: {agent.convergence_rates}')
 
     return None # TODO figure out what to return if anything

@@ -10,7 +10,7 @@ from models.ANN import ANN
  learning" by Mnih et al. (https://www.nature.com/articles/nature14236)
 '''
 class DeepQAgent(object):
-    def __init__(self, input_size, hidden_size, output_size, learning_rate=0.01, gamma=0.99):
+    def __init__(self, input_size, hidden_size, output_size, learning_rate=0.001, gamma=0.95):
         self.use_raw = False
         self.q_network = ANN(input_size, hidden_size, output_size)
         self.target_network = ANN(input_size, hidden_size, output_size)
@@ -43,16 +43,12 @@ class DeepQAgent(object):
                 q_values = self.q_network(state)
                 return torch.argmax(q_values)
 
-    def train(self, state, action, next_state, reward, done):
+    def train(self, state, action, next_state, reward):
         q_values = self.q_network(state)
         next_q_values = self.target_network(next_state)
 
         target_q_values = q_values.clone()
-
-        if done:
-            target_q_values[action] = reward
-        else:
-            target_q_values[action] = reward + self.gamma * torch.max(next_q_values)
+        target_q_values[action] = reward + self.gamma * torch.max(next_q_values)
 
         loss = self.criterion(q_values, target_q_values)
         self.optimizer.zero_grad()

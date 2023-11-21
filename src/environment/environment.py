@@ -60,7 +60,7 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                         f.write('{},{},{},{}\n'.format(s, a, r, s_prime))
 
                         # Train the agent online
-                        env.agents[0].train(torch.from_numpy(s).float(), a, torch.from_numpy(s_prime).float(), r, False)
+                        env.agents[0].train(torch.from_numpy(s).float(), a, torch.from_numpy(s_prime).float(), r)
 
                 # If the human does not take the final action, we need to
                 # print other players' actions

@@ -107,6 +107,14 @@ def main(args: argparse.Namespace) -> None:
     entropy = evaluator.calculate_action_entropy(args.episodes)
     print(f'Action Entropy: {entropy}')
 
+    # calculate initial action distribution
+    intial_action_distribution = evaluator.calculate_initial_action_distribution(args.episodes)
+    print(f'Initial Action Distribution: FOLD = {intial_action_distribution[0]}, CALL = {intial_action_distribution[1]}, RAISE = {intial_action_distribution[2]}, ALL IN = {intial_action_distribution[3]}')
+    
+    # calculate average initial raise fraction of pot
+    average_initial_raise_fraction = evaluator.calculate_initial_raise_fraction(args.episodes)
+    print(f'Average Initial Raise Fraction of Pot: {average_initial_raise_fraction}')
+
     # TODO plot convergence rates
     print(f'Convergence Rates: {agent.convergence_rates}')
 

@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     """Parse arguments from command line into ARGS."""
 
     parser = argparse.ArgumentParser(
-        description="The runner for our DeepQPoker project",
+        description="The runner for our DeepQHoldem project.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 

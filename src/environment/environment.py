@@ -8,19 +8,25 @@ from rlcard.utils import print_card, reorganize, tournament, Logger, plot_curve
 import numpy as np
 import os
 
-def setupEnvironment(num_chips, custom_agent=None, is_human=False):
+def setupEnvironment(num_chips, custom_agent=None, custom_adversary=None, is_human=False, is_leduc=False):
     # make environment
     global_seed = 0
     env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
-    # eval_env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
+
     def step(state):
         action, _ = opponent_agent.eval_step(state)
         return action
     
-    if not is_human:
-        opponent_agent = CFRAgent(env, model_path=os.path.join(ROOT_PATH, 'leduc_holdem_cfr'))
-        opponent_agent.step = step
+    if not custom_adversary:
+        if is_leduc:
+            opponent_agent = CFRAgent(env, model_path=os.path.join(ROOT_PATH, 'leduc_holdem_cfr'))
+            opponent_agent.step = step
+        else:
+            opponent_agent = RandomAgent(env.num_actions)
     else:
+        opponent_agent = custom_adversary
+
+    if is_human:
         opponent_agent = HumanAgent(env.num_actions)
 
     if custom_agent is not None:

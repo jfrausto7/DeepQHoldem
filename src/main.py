@@ -1,5 +1,6 @@
 import os
 import argparse
+from agents.TAGAgent import TAGAgent
 import torch
 from agents.DeepQAgent import DeepQAgent
 from environment.environment import setupEnvironment
@@ -14,6 +15,7 @@ config = {
     "num_actions": 23,
     "convergence_interval": 1000,
     "human_episodes": 5,
+    "adversarial_agent": None,
     "training_data_filename": '{}/training_data/data_samples.csv'.format(os.path.dirname(__file__))
 }
 
@@ -54,6 +56,14 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--adversary",
+        default=config["adversarial_agent"],
+        type=int,
+        help="Integer representing adversarial agent to evaluate against.",
+        dest="adversary",
+    )
+
+    parser.add_argument(
         "--human", help="Play against the agent! Be sure to include the '--generated' flag otherwise it won't be trained!",
         action="store_true", dest="human"
     )
@@ -77,46 +87,60 @@ def main(args: argparse.Namespace) -> None:
 
     # instantiate agent & envioronment
     agent = DeepQAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
-    env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
+    
+    envs = []
 
-    # populate training_data_file with data from playing against an automated agent
+    # error checking
+    if args.adversary is not None and args.adversary > 5:
+        raise Exception("Adversary is out of range! Enter a number between 1-5.")
+    
+    # adversarial agent strategies
+    if args.adversary == 1:
+        adversarial_agent = TAGAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
+        env = setupEnvironment(num_chips=args.chips, custom_agent=agent, custom_adversary=adversarial_agent)
+        envs.append((env, "TAG"))
+    else:
+        env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
+
+    # play and learn against agent
     if args.generate:
         generateData(env, args.episodes, args.convergence_interval, config["training_data_filename"])
-
-    # training loop
-    # train(agent, env, args.episodes, args.freq)
-
-    # start game
-    # playGame(env, num_episodes=args.episodes, is_training=False)
 
     # evaluate
     if args.human:
         env = setupEnvironment(num_chips=args.chips, custom_agent=agent, is_human=True)
         args.episodes = args.human_episodes
-    evaluator = Evaluator(env)
+        envs.append((env, "Human"))
+    else:
+        randomEnv = setupEnvironment(num_chips=args.chips, custom_agent=agent)
+        envs.append((randomEnv, "Random"))
+        leducEnv = setupEnvironment(num_chips=args.chips, custom_agent=agent, is_leduc=True)
+        envs.append((leducEnv, "Leduc"))
 
     # calculate win rate after training or data generation
-    win_rate = evaluator.calculate_win_rate(args.episodes)
-    print(f"Win Rate: {win_rate * 100:.2f}%")
+    for env in envs:
+        evaluator = Evaluator(env[0])
+        win_rate = evaluator.calculate_win_rate(args.episodes)
+        print(f"Win Rate against {env[1]} agent: {win_rate * 100:.2f}%")
 
-    # calculate expected earnings
-    avg_expected_earnings = evaluator.calculate_expected_earnings(args.episodes)
-    print(f'Average Expected Earnings: {avg_expected_earnings}')
+        # calculate expected earnings
+        avg_expected_earnings = evaluator.calculate_expected_earnings(args.episodes)
+        print(f'Average Expected Earnings against {env[1]} agent: {avg_expected_earnings}')
 
-    # calculate action entropy
-    entropy = evaluator.calculate_action_entropy(args.episodes)
-    print(f'Action Entropy: {entropy}')
+        # calculate action entropy
+        entropy = evaluator.calculate_action_entropy(args.episodes)
+        print(f'Action Entropy against {env[1]} agent: {entropy}')
 
-    # calculate initial action distribution
-    intial_action_distribution = evaluator.calculate_initial_action_distribution(args.episodes)
-    print(f'Initial Action Distribution: FOLD = {intial_action_distribution[0]}, CALL = {intial_action_distribution[1]}, RAISE = {intial_action_distribution[2]}, ALL IN = {intial_action_distribution[3]}')
-    
-    # calculate average initial raise fraction of pot
-    average_initial_raise_fraction = evaluator.calculate_initial_raise_fraction(args.episodes)
-    print(f'Average Initial Raise Fraction of Pot: {average_initial_raise_fraction}')
+        # calculate initial action distribution
+        intial_action_distribution = evaluator.calculate_initial_action_distribution(args.episodes)
+        print(f'Initial Action Distribution against {env[1]} agent: FOLD = {intial_action_distribution[0]}, CALL = {intial_action_distribution[1]}, RAISE = {intial_action_distribution[2]}, ALL IN = {intial_action_distribution[3]}')
+        
+        # calculate average initial raise fraction of pot
+        average_initial_raise_fraction = evaluator.calculate_initial_raise_fraction(args.episodes)
+        print(f'Average Initial Raise Fraction of Pot against {env[1]} agent: {average_initial_raise_fraction}')
 
-    # TODO plot convergence rates
-    print(f'Convergence Rates: {agent.convergence_rates}')
+        # TODO plot convergence rates
+        print(f'Convergence Rates against {env[1]} agent: {agent.convergence_rates}')
 
     return None # TODO figure out what to return if anything
 

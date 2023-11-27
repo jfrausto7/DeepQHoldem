@@ -6,6 +6,9 @@ import numpy as np
 
 from models.ANN import ANN
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
 '''Simplified implementation of agent described in "Human-level control through deep reinforcement
  learning" by Mnih et al. (https://www.nature.com/articles/nature14236)
 '''
@@ -19,12 +22,17 @@ class DeepQAgent(object):
         self.criterion = nn.MSELoss()
         self.gamma = gamma
         self.convergence_rates = []
+
+        # make accessible to GPU
+        self.q_network.to(device)
+
     
     def step(self, state):
         legal_actions = list(state['legal_actions'].keys())
         actions = np.zeros(list(self.q_network.modules())[-1].out_features)
         actions[legal_actions] = 1
         s = torch.from_numpy(np.concatenate((state['obs'], actions)).astype(np.float32))
+        s = s.to(device)
 
         action = self.select_action(s, 0.1, legal_actions).item()
         while action not in legal_actions:

@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--generate", help="Generate data using naive agent.", action="store_true", dest="generate"
+        "--generate", help="Generate data & train with agent.", action="store_true", dest="generate"
     )
 
     parser.add_argument(

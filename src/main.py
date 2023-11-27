@@ -1,5 +1,6 @@
 import os
 import argparse
+from agents.LAGAgent import LAGAgent
 from agents.TAGAgent import TAGAgent
 import torch
 from agents.DeepQAgent import DeepQAgent
@@ -99,6 +100,10 @@ def main(args: argparse.Namespace) -> None:
         adversarial_agent = TAGAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
         env = setupEnvironment(num_chips=args.chips, custom_agent=agent, custom_adversary=adversarial_agent)
         envs.append((env, "TAG"))
+    elif args.adversary == 2:
+        adversarial_agent = LAGAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
+        env = setupEnvironment(num_chips=args.chips, custom_agent=agent, custom_adversary=adversarial_agent)
+        envs.append((env, "LAG"))
     else:
         env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
 

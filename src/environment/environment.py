@@ -12,6 +12,7 @@ def setupEnvironment(num_chips, custom_agent=None, custom_adversary=None, is_hum
     # make environment
     global_seed = 0
     env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
+    env.customAdversary = custom_adversary
 
     def step(state):
         action, _ = opponent_agent.eval_step(state)
@@ -105,13 +106,14 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                 # evaluate convergence rate & plot reward values
                 if i % convergence_interval == 0 and i != 0:
                     print("Evaluating...")
-                    logger.log_performance(
-                        i,
-                        tournament(
-                            env,
-                            convergence_interval,
-                        )[0]
-                    )
+                    if not env.customAdversary:
+                        logger.log_performance(
+                            i,
+                            tournament(
+                                env,
+                                convergence_interval,
+                            )[0]
+                        )
                     convergence_rate = env.agents[0].calculate_convergence_rate()
                     env.agents[0].update_target_network()
                     print(f'Convergence rate after {i} episodes: {convergence_rate}')

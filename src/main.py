@@ -2,6 +2,7 @@ import os
 import time
 import argparse
 from agents.LAGAgent import LAGAgent
+from agents.RockAgent import RockAgent
 from agents.TAGAgent import TAGAgent
 import torch
 from agents.DeepQAgent import DeepQAgent
@@ -105,6 +106,10 @@ def main(args: argparse.Namespace) -> None:
         adversarial_agent = LAGAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
         env = setupEnvironment(num_chips=args.chips, custom_agent=agent, custom_adversary=adversarial_agent)
         envs.append((env, "LAG"))
+    elif args.adversary == 3:
+        adversarial_agent = RockAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
+        env = setupEnvironment(num_chips=args.chips, custom_agent=agent, custom_adversary=adversarial_agent)
+        envs.append((env, "Rock"))
     else:
         env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
 

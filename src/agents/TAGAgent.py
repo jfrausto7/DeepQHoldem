@@ -66,7 +66,7 @@ class TAGAgent(object):
       if hand_strength < self.low_threshold:
           # fold or bluff
           rand_num = np.random.uniform(0, 1)
-          raise_actions = [a for a in legal_actions if a > 1 and a < len(legal_actions) - 1] #TODO: include ALL_IN action
+          raise_actions = [a for a in legal_actions if a > 1 and a < len(legal_actions) - 1]
           if (rand_num < self.bluffing_rate) and raise_actions:
               action = np.random.choice(raise_actions)
               return legal_actions[action]
@@ -79,7 +79,7 @@ class TAGAgent(object):
               return legal_actions[0]  # fold
       else:
           # play a fractional raise action with the highest Q-value based on hand strength if available
-          raise_actions = [a for a in legal_actions if a > 1 and a < len(legal_actions) - 1]    #TODO: include ALL_IN action
+          raise_actions = [a for a in legal_actions if a > 1 and a < len(legal_actions) - 1]
           if raise_actions:
               q_values = self.q_network(s)
               weighted_q_values = [q_values[a] * self.evaluate_weight_for_action(a, hand_strength, raise_actions) for a in raise_actions]

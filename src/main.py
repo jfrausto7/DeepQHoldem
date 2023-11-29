@@ -1,4 +1,5 @@
 import os
+import time
 import argparse
 from agents.LAGAgent import LAGAgent
 from agents.TAGAgent import TAGAgent
@@ -84,7 +85,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main(args: argparse.Namespace) -> None:
-    # TODO: fill in main function
+    st = time.time()
 
     # instantiate agent & envioronment
     agent = DeepQAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
@@ -147,7 +148,8 @@ def main(args: argparse.Namespace) -> None:
         # TODO plot convergence rates
         print(f'Convergence Rates against {env[1]} agent: {agent.convergence_rates}')
 
-    return None # TODO figure out what to return if anything
+        print("Execution Time: " + str((time.time() - st)/60) + " minutes")
+    return None
 
 if __name__ == "__main__":
     args = parse_args()

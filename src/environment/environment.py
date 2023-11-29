@@ -40,7 +40,7 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
             f.write('s,a,r,s_prime\n')
         
         with Logger(log_dir) as logger:
-            for i in range(num_episodes):
+            for i in range(1, num_episodes + 1):
                 print("Game number " + str(i))
                 print(">> Start a new game")
 
@@ -97,14 +97,13 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                 print('')
 
                 # evaluate convergence rate & plot reward values
-                if i % convergence_interval == 0 and i != 0:
+                if i % convergence_interval == 0:
                     print("Evaluating...")
+                    tournament_result = tournament(env, convergence_interval)
                     logger.log_performance(
                         i,
-                        tournament(
-                            env,
-                            convergence_interval,
-                        )[0]
+                        tournament_result[0][0],
+                        tournament_result[1][0]
                     )
                     convergence_rate = env.agents[0].calculate_convergence_rate()
                     env.agents[0].update_target_network()

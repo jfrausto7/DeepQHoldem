@@ -25,7 +25,8 @@ class TAGAgent(object):
 
         # make accessible to GPU
         self.q_network.to(device)
-
+        self.target_network.to(device)
+        
     def card_transform(self, cards):
       '''
       Format conversion for lookup table

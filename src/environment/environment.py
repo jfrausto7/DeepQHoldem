@@ -8,6 +8,8 @@ from rlcard.utils import print_card, reorganize, tournament, Logger, plot_curve
 import numpy as np
 import os
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 def setupEnvironment(num_chips, custom_agent=None, custom_adversary=None, is_human=False, is_leduc=False):
     # make environment
     global_seed = 0
@@ -67,7 +69,9 @@ def playGame(env, num_episodes, convergence_interval, is_training=True, training
                         f.write('{},{},{},{}\n'.format(s, a, r, s_prime))
 
                         # Train the agent online
-                        env.agents[0].train(torch.from_numpy(s).float(), a, torch.from_numpy(s_prime).float(), r)
+                        s = torch.from_numpy(s).float().to(device)
+                        s_prime = torch.from_numpy(s_prime).float().to(device)
+                        env.agents[0].train(s, a, s_prime, r)
 
                 # If the human does not take the final action, we need to
                 # print other players' actions

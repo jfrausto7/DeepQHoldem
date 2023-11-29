@@ -74,19 +74,19 @@ class Lookup():
                 if card == card2: continue
                 new_opponent_range[card_tools.hand_to_id((card, card2))] = 0
         new_opponent_range /= sum(new_opponent_range)
-        hands = np.zeros([1326, 7], dtype=np.int)
-        board = np.array([card_tools.card_to_id(card) for card in public_card], dtype=np.int)
+        hands = np.zeros([1326, 7], dtype=np.int32)
+        board = np.array([card_tools.card_to_id(card) for card in public_card], dtype=np.int32)
         hands[: ,  :5 ] = np.repeat(board.reshape([1, 5]), 1326, axis=0)
         hands[: , 5:7 ] = card_tools.hand_ids
         hands_strength = card_tools.evaluate(hands)
-        lbr_hand = np.array([[card_tools.card_to_id(card) for card in (*public_card, *private_card)]], dtype=np.int)
+        lbr_hand = np.array([[card_tools.card_to_id(card) for card in (*public_card, *private_card)]], dtype=np.int32)
         lbr_strength = card_tools.evaluate(lbr_hand)
-        result = (lbr_strength > hands_strength).astype(np.float) + (lbr_strength == hands_strength).astype(np.float) * 0.5
+        result = (lbr_strength > hands_strength).astype(np.float32) + (lbr_strength == hands_strength).astype(np.float32) * 0.5
         np.set_printoptions(threshold = 1e6)
         self.outcome += np.dot(result, new_opponent_range)
     
     def random_init_range(self, cards):
-        opponent_range = np.array([1 for i in range(1326)], dtype=np.float)
+        opponent_range = np.array([1 for i in range(1326)], dtype=np.float32)
         for card in cards:
             for card2_id in range(52):
                 card2 = card_tools.id_to_card(card2_id)

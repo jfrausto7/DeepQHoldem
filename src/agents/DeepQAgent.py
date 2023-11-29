@@ -25,6 +25,7 @@ class DeepQAgent(object):
 
         # make accessible to GPU
         self.q_network.to(device)
+        self.target_network.to(device)
 
     
     def step(self, state):

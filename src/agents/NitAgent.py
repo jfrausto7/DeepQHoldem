@@ -66,8 +66,9 @@ class NitAgent(object):
         if hand_strength < self.low_threshold:
             # fold or bluff
             rand_num = np.random.uniform(0, 1)
-            if (rand_num < self.bluffing_rate) and legal_actions:
-                action = np.random.choice(legal_actions)
+            raise_actions = [a for a in legal_actions if a > 1 and a < len(legal_actions) - 1]
+            if (rand_num < self.bluffing_rate) and raise_actions:
+                action = np.random.choice(raise_actions)
                 return legal_actions[action]
             return legal_actions[0]  # fold
         elif hand_strength < self.high_threshold:

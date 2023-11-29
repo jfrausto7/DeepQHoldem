@@ -12,11 +12,11 @@ from utils.data_utils import generateData
 from utils.evaluation import Evaluator
 
 config = {
-    "episodes": 100000,
+    "episodes": 10000,
     "chips": 1000,
     "state_size": 77,
     "num_actions": 23,
-    "convergence_interval": 1000,
+    "convergence_interval": 100,
     "human_episodes": 5,
     "adversarial_agent": None,
     "training_data_filename": '{}/training_data/data_samples.csv'.format(os.path.dirname(__file__))

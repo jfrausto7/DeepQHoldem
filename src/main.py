@@ -3,6 +3,7 @@ import time
 import argparse
 from agents.FishAgent import FishAgent
 from agents.LAGAgent import LAGAgent
+from agents.NitAgent import NitAgent
 from agents.RockAgent import RockAgent
 from agents.TAGAgent import TAGAgent
 import torch
@@ -115,6 +116,10 @@ def main(args: argparse.Namespace) -> None:
         adversarial_agent = FishAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
         env = setupEnvironment(num_chips=args.chips, custom_agent=agent, custom_adversary=adversarial_agent)
         envs.append((env, "Fish"))
+    elif args.adversary == 5:
+        adversarial_agent = NitAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
+        env = setupEnvironment(num_chips=args.chips, custom_agent=agent, custom_adversary=adversarial_agent)
+        envs.append((env, "Nit"))
     else:
         env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
 

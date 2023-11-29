@@ -9,7 +9,7 @@ from models.ANN import ANN
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-class RockAgent(object):
+class FishAgent(object):
     def __init__(self, input_size, hidden_size, output_size, learning_rate=0.001, gamma=0.95):
         self.use_raw = False
         self.q_network = ANN(input_size, hidden_size, output_size)
@@ -19,9 +19,9 @@ class RockAgent(object):
         self.criterion = nn.MSELoss()
         self.gamma = gamma
         self.lookup = Lookup()
-        self.low_threshold = 100
+        self.low_threshold = -400
         self.high_threshold = 500
-        self.bluffing_rate = None
+        self.bluffing_rate = 0.2
 
         # make accessible to GPU
         self.q_network.to(device)
@@ -52,7 +52,7 @@ class RockAgent(object):
             return 1.0
         
     def step(self, state):
-        # rock strategy for evaluation
+        # fish strategy for evaluation
         legal_actions = list(state['legal_actions'].keys())
         actions = np.zeros(list(self.q_network.modules())[-1].out_features)
         actions[legal_actions] = 1
@@ -62,7 +62,7 @@ class RockAgent(object):
         # evaluate hand strength
         hand_strength = self.evaluate_hand_strength(state)
 
-        # play safe (fold or check) based on hand strength
+        # play cautiously (check/fold) based on hand strength
         if hand_strength < self.low_threshold:
             return legal_actions[0]  # fold
         elif hand_strength < self.high_threshold:
@@ -71,19 +71,19 @@ class RockAgent(object):
             else:
                 return legal_actions[0]  # fold
         else:
-            # raise if possible (otherwise fold or check) based on hand strength
+            # play a fractional raise action with the highest Q-value based on hand strength if available
             raise_actions = [a for a in legal_actions if a > 1 and a < len(legal_actions) - 1]
             if raise_actions:
-                # Select one of the highest available raise actions
-                selected_raise_action = np.random.choice(raise_actions)
-                return selected_raise_action
+                q_values = self.q_network(s)
+                weighted_q_values = [q_values[a] * self.evaluate_weight_for_action(a, hand_strength, raise_actions) for a in raise_actions]
+                max_raise_index = raise_actions[int(torch.argmax(torch.tensor(weighted_q_values)).detach().numpy())]
+                return legal_actions[max_raise_index]
             else:
                 if 1 in legal_actions:
                     return legal_actions[1]  # check
                 else:
                     return legal_actions[0]  # fold
 
-        
     def eval_step(self, state):
         return self.step(state), {}
 

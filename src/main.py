@@ -1,6 +1,7 @@
 import os
 import time
 import argparse
+from agents.FishAgent import FishAgent
 from agents.LAGAgent import LAGAgent
 from agents.RockAgent import RockAgent
 from agents.TAGAgent import TAGAgent
@@ -110,6 +111,10 @@ def main(args: argparse.Namespace) -> None:
         adversarial_agent = RockAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
         env = setupEnvironment(num_chips=args.chips, custom_agent=agent, custom_adversary=adversarial_agent)
         envs.append((env, "Rock"))
+    elif args.adversary == 4:
+        adversarial_agent = FishAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
+        env = setupEnvironment(num_chips=args.chips, custom_agent=agent, custom_adversary=adversarial_agent)
+        envs.append((env, "Fish"))
     else:
         env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
 

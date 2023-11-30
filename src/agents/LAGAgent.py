@@ -60,7 +60,6 @@ class LAGAgent(object):
 
         # evaluate hand strength
         hand_strength = self.evaluate_hand_strength(state)
-        print("HAND STRENGTH: " + str(hand_strength))
 
         # play best action (highest Q-value) based on hand strength if available, otherwise, check/fold
         if hand_strength < self.low_threshold:

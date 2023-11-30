@@ -30,16 +30,13 @@ def setupEnvironment(num_players, num_chips, custom_agent, is_human=False):
     
     return env
 
-def playGame(env, num_episodes, convergence_interval, is_training=True, training_data_filename='{}/../training_data/data_samples.csv'):
-
-    log_dir = f'./experiments/logs/{num_episodes}/'
+def playGame(env, num_episodes, convergence_interval, experiment_dir, is_training=True):
     try:
         if is_training:
-            os.makedirs(os.path.dirname(training_data_filename), exist_ok=True)
-            f = open(training_data_filename, 'w')
+            f = open(experiment_dir + 'training_data.csv', 'w')
             f.write('s,a,r,s_prime\n')
         
-        with Logger(log_dir) as logger:
+        with Logger(experiment_dir) as logger:
             for i in range(1, num_episodes + 1):
                 print("Game number " + str(i))
                 print(">> Start a new game")

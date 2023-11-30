@@ -1,9 +1,8 @@
 import os
 import argparse
+import json
 from agents.DeepQAgent import DeepQAgent
-from environment.environment import setupEnvironment
-
-from utils.data_utils import generateData
+from environment.environment import setupEnvironment, playGame
 from utils.evaluation import Evaluator
 
 config = {
@@ -112,7 +111,12 @@ def parse_args() -> argparse.Namespace:
 def main(args: argparse.Namespace) -> None:
     # TODO: fill in main function
 
+    # directory to store all the files/data for this experiment
+    experiment_dir = f"./experiments/episodes{args.episodes}_players{args.players}_chips{args.chips}_dropout{args.dropout}_lr{args.learning_rate}_gamma{args.gamma}_epsilon{args.epsilon}/"
+    os.makedirs(experiment_dir, exist_ok=True)
+
     experiment_params = {
+        "episodes": args.episodes,
         "players": args.players,
         "chips": args.chips,
         "dropout": args.dropout,
@@ -120,6 +124,8 @@ def main(args: argparse.Namespace) -> None:
         "gamma": args.gamma,
         "epsilon": args.epsilon
     }
+    with open(experiment_dir + 'experiment_params.json', 'w') as f:
+        f.write(json.dumps(experiment_params, indent=4))
 
     # instantiate agent & envioronment
     agent = DeepQAgent(config["state_size"],
@@ -132,7 +138,7 @@ def main(args: argparse.Namespace) -> None:
 
     # populate training_data_file with data from playing against an automated agent
     if args.generate:
-        generateData(env, args.episodes, args.convergence_interval, '{}/training_data/data_samples.csv'.format(os.path.dirname(__file__)))
+        playGame(env, args.episodes, args.convergence_interval, experiment_dir, is_training=True)
 
     # training loop
     # train(agent, env, args.episodes, args.freq)
@@ -146,28 +152,38 @@ def main(args: argparse.Namespace) -> None:
         args.episodes = args.human_episodes
     evaluator = Evaluator(env)
 
+    f = open(experiment_dir + 'evaluation_results.txt', 'w')
+
     # calculate win rate after training or data generation
     win_rate = evaluator.calculate_win_rate(args.episodes)
+    f.write(f"Win Rate: {win_rate * 100:.2f}%\n")
     print(f"Win Rate: {win_rate * 100:.2f}%")
 
     # calculate expected earnings
     avg_expected_earnings = evaluator.calculate_expected_earnings(args.episodes)
+    f.write(f'Average Expected Earnings: {avg_expected_earnings}\n')
     print(f'Average Expected Earnings: {avg_expected_earnings}')
 
     # calculate action entropy
     entropy = evaluator.calculate_action_entropy(args.episodes)
+    f.write(f'Action Entropy: {entropy}\n')
     print(f'Action Entropy: {entropy}')
 
     # calculate initial action distribution
     intial_action_distribution = evaluator.calculate_initial_action_distribution(args.episodes)
+    f.write(f'Initial Action Distribution: FOLD = {intial_action_distribution[0]}, CALL = {intial_action_distribution[1]}, RAISE = {intial_action_distribution[2]}, ALL IN = {intial_action_distribution[3]}\n')
     print(f'Initial Action Distribution: FOLD = {intial_action_distribution[0]}, CALL = {intial_action_distribution[1]}, RAISE = {intial_action_distribution[2]}, ALL IN = {intial_action_distribution[3]}')
     
     # calculate average initial raise fraction of pot
     average_initial_raise_fraction = evaluator.calculate_initial_raise_fraction(args.episodes)
+    f.write(f'Average Initial Raise Fraction of Pot: {average_initial_raise_fraction}\n')
     print(f'Average Initial Raise Fraction of Pot: {average_initial_raise_fraction}')
 
     # TODO plot convergence rates
+    f.write(f'Convergence Rates: {agent.convergence_rates}\n')
     print(f'Convergence Rates: {agent.convergence_rates}')
+
+    f.close()
 
     return None # TODO figure out what to return if anything
 

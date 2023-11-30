@@ -1,6 +1,5 @@
 import os
 import argparse
-import torch
 from agents.DeepQAgent import DeepQAgent
 from environment.environment import setupEnvironment
 
@@ -9,12 +8,10 @@ from utils.evaluation import Evaluator
 
 config = {
     "episodes": 100000,
-    "chips": 1000,
     "state_size": 77,
     "num_actions": 23,
     "convergence_interval": 1000,
-    "human_episodes": 5,
-    "training_data_filename": '{}/training_data/data_samples.csv'.format(os.path.dirname(__file__))
+    "human_episodes": 5
 }
 
 def parse_args() -> argparse.Namespace:
@@ -38,14 +35,6 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--chips",
-        default=config["chips"],
-        type=int,
-        help="Number of starting chips for each agent/player.",
-        dest="chips",
-    )
-
-    parser.add_argument(
         "--convergence_interval",
         default=config["convergence_interval"],
         type=int,
@@ -66,6 +55,54 @@ def parse_args() -> argparse.Namespace:
         dest="human_episodes",
     )
 
+    parser.add_argument(
+        "--players",
+        default=2,
+        type=int,
+        help="Number of players in the game.",
+        dest="players",
+    )
+
+    parser.add_argument(
+        "--chips",
+        default=1000,
+        type=int,
+        help="Number of starting chips for each agent/player.",
+        dest="chips",
+    )
+
+    parser.add_argument(
+        "--dropout",
+        default=0.2,
+        type=float,
+        help="Dropout rate for the DeepQAgent ANN.",
+        dest="dropout",
+    )
+
+    parser.add_argument(
+        "--learning-rate",
+        default=0.001,
+        type=float,
+        help="Learning rate for the DeepQAgent.",
+        dest="learning_rate",
+    )
+
+    parser.add_argument(
+        "--gamma",
+        default=0.95,
+        type=float,
+        help="Discount factor gamma for the DeepQAgent.",
+        dest="gamma",
+    )
+
+    parser.add_argument(
+        "--epsilon",
+        default=0.1,
+        type=float,
+        help="Epsilon value for the DeepQAgent epsilon-greedy action selection.",
+        dest="epsilon",
+    )
+
     # TODO: add any needed args for parsing
 
     return parser.parse_args()
@@ -75,13 +112,27 @@ def parse_args() -> argparse.Namespace:
 def main(args: argparse.Namespace) -> None:
     # TODO: fill in main function
 
+    experiment_params = {
+        "players": args.players,
+        "chips": args.chips,
+        "dropout": args.dropout,
+        "learning_rate": args.learning_rate,
+        "gamma": args.gamma,
+        "epsilon": args.epsilon
+    }
+
     # instantiate agent & envioronment
-    agent = DeepQAgent(config["state_size"], int(config["state_size"] / 3 + config["num_actions"]), config["num_actions"]) # (1/3) of state space + action space
-    env = setupEnvironment(num_chips=args.chips, custom_agent=agent)
+    agent = DeepQAgent(config["state_size"],
+                       int(config["state_size"] / 3 + config["num_actions"]), # (1/3) of state space + action space
+                       config["num_actions"],
+                       learning_rate=args.learning_rate,
+                       gamma=args.gamma,
+                       epsilon=args.epsilon)
+    env = setupEnvironment(args.players, args.chips, agent)
 
     # populate training_data_file with data from playing against an automated agent
     if args.generate:
-        generateData(env, args.episodes, args.convergence_interval, config["training_data_filename"])
+        generateData(env, args.episodes, args.convergence_interval, '{}/training_data/data_samples.csv'.format(os.path.dirname(__file__)))
 
     # training loop
     # train(agent, env, args.episodes, args.freq)
@@ -91,7 +142,7 @@ def main(args: argparse.Namespace) -> None:
 
     # evaluate
     if args.human:
-        env = setupEnvironment(num_chips=args.chips, custom_agent=agent, is_human=True)
+        env = setupEnvironment(2, args.chips, agent, is_human=True)
         args.episodes = args.human_episodes
     evaluator = Evaluator(env)
 

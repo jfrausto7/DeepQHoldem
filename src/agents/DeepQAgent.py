@@ -10,7 +10,7 @@ from models.ANN import ANN
  learning" by Mnih et al. (https://www.nature.com/articles/nature14236)
 '''
 class DeepQAgent(object):
-    def __init__(self, input_size, hidden_size, output_size, learning_rate=0.001, gamma=0.95):
+    def __init__(self, input_size, hidden_size, output_size, learning_rate=0.001, gamma=0.95, epsilon=0.1):
         self.use_raw = False
         self.q_network = ANN(input_size, hidden_size, output_size)
         self.target_network = ANN(input_size, hidden_size, output_size)
@@ -18,6 +18,7 @@ class DeepQAgent(object):
         self.optimizer = optim.Adam(self.q_network.parameters(), lr=learning_rate)
         self.criterion = nn.MSELoss()
         self.gamma = gamma
+        self.epsilon = epsilon
         self.convergence_rates = []
     
     def step(self, state):
@@ -26,9 +27,9 @@ class DeepQAgent(object):
         actions[legal_actions] = 1
         s = torch.from_numpy(np.concatenate((state['obs'], actions)).astype(np.float32))
 
-        action = self.select_action(s, 0.1, legal_actions).item()
+        action = self.select_action(s, self.epsilon, legal_actions).item()
         while action not in legal_actions:
-            action = self.select_action(s, 0.1, legal_actions).item()
+            action = self.select_action(s, self.epsilon, legal_actions).item()
         return action
     
     def eval_step(self, state):

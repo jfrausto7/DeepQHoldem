@@ -1,14 +1,14 @@
 from logging import Logger
 import torch
 import rlcard
-from rlcard.agents import RandomAgent, CFRAgent
+from rlcard.agents import CFRAgent
 from rlcard.agents import NolimitholdemHumanAgent as HumanAgent
 from rlcard.models.pretrained_models import ROOT_PATH
 from rlcard.utils import print_card, reorganize, tournament, Logger, plot_curve
 import numpy as np
 import os
 
-def setupEnvironment(num_chips, custom_agent=None, is_human=False):
+def setupEnvironment(num_players, num_chips, custom_agent, is_human=False):
     # make environment
     global_seed = 0
     env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
@@ -18,15 +18,15 @@ def setupEnvironment(num_chips, custom_agent=None, is_human=False):
         return action
     
     if not is_human:
-        opponent_agent = CFRAgent(env, model_path=os.path.join(ROOT_PATH, 'leduc_holdem_cfr'))
-        opponent_agent.step = step
+        opponent_agents = []
+        for _ in range(num_players - 1):
+            opponent_agent = CFRAgent(env, model_path=os.path.join(ROOT_PATH, 'leduc_holdem_cfr'))
+            opponent_agent.step = step
+            opponent_agents.append(opponent_agent)
     else:
-        opponent_agent = HumanAgent(env.num_actions)
+        opponent_agents = [HumanAgent(env.num_actions) for _ in range(num_players - 1)]
 
-    if custom_agent is not None:
-        env.set_agents([custom_agent, opponent_agent])
-    else:
-        env.set_agents([RandomAgent(env.num_actions), opponent_agent])
+    env.set_agents([custom_agent] + opponent_agents)
     
     return env
 

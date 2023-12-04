@@ -1,0 +1,9 @@
+{
+    "episodes": 100000,
+    "players": 2,
+    "chips": 1000,
+    "dropout": 0.2,
+    "learning_rate": 0.001,
+    "gamma": 0.5,
+    "epsilon": 0.1
+}

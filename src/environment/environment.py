@@ -112,7 +112,7 @@ def playGame(env, num_episodes, convergence_interval, experiment_dir, is_trainin
             # get paths
             csv_path, fig_path = logger.csv_path, logger.fig_path
         # plot the reward learning curve
-        plot_curve(csv_path, fig_path, 'cfr')
+        plot_curve(csv_path, fig_path, 'DeepQAgent')
 
     finally:
         if is_training:

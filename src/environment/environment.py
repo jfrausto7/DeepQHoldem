@@ -11,7 +11,7 @@ import os
 def setupEnvironment(num_players, num_chips, custom_agent, is_human=False):
     # make environment
     global_seed = 0
-    env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
+    env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': num_players,'chips_for_each': num_chips})
     # eval_env = rlcard.make('no-limit-holdem', config={'seed': global_seed,'game_num_players': 2,'chips_for_each': num_chips})
     def step(state):
         action, _ = opponent_agent.eval_step(state)
